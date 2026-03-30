@@ -1,11 +1,16 @@
-import { headers as getHeaders } from 'next/headers.js'
-import Image from 'next/image'
-import { getPayload } from 'payload'
-import React from 'react'
-import { fileURLToPath } from 'url'
+import { headers as getHeaders } from "next/headers.js"
+import { getPayload } from "payload"
+import { fileURLToPath } from "url"
 
-import config from '@/payload.config'
-import './styles.css'
+import config from "@/payload.config"
+import "./style/globals.css"
+
+import { ModeToggle } from "./components/ui/theme-toggle"
+import { Hero } from "./components/sections"
+import { Header } from "./components/header"
+import { ExternalLinks } from "./components/external-links"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
 
 export default async function HomePage() {
   const headers = await getHeaders()
@@ -15,45 +20,31 @@ export default async function HomePage() {
 
   const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
 
+  const socials = await payload.findGlobal({ slug: "social-links" })
+  const socialsLinks = socials.links
+  console.log(socialsLinks?.[0]?.url)
+
   return (
-    <div className="home">
-      <div className="content">
-        <picture>
-          <source srcSet="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg" />
-          <Image
-            alt="Payload Logo"
-            height={65}
-            src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-favicon.svg"
-            width={65}
-          />
-        </picture>
-        {!user && <h1>Welcome to your new project.</h1>}
-        {user && <h1>Welcome back, {user.email}</h1>}
-        <div className="links">
-          <a
-            className="admin"
-            href={payloadConfig.routes.admin}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Go to admin panel
-          </a>
-          <a
-            className="docs"
-            href="https://payloadcms.com/docs"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Documentation
-          </a>
-        </div>
+    <main className="container mx-auto min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-xl">
+        <Hero>
+          <Header />
+          <ModeToggle />
+          <ExternalLinks />
+
+          <div className="p-6 flex gap-4 items-center justify-center">
+            <a href={socialsLinks?.[0]?.url} target="_blank">
+              <Button variant="social" size="icon">
+                {socialsLinks?.[0] &&
+                  typeof socialsLinks[0].icone !== "string" &&
+                  socialsLinks[0].icone?.url && (
+                    <Image src={socialsLinks[0].icone.url} alt="Icone" width={32} height={32} />
+                  )}
+              </Button>
+            </a>
+          </div>
+        </Hero>
       </div>
-      <div className="footer">
-        <p>Update this page by editing</p>
-        <a className="codeLink" href={fileURL}>
-          <code>app/(frontend)/page.tsx</code>
-        </a>
-      </div>
-    </div>
+    </main>
   )
 }

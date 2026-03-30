@@ -1139,3 +1139,160 @@ For deeper exploration of specific topics, refer to the context files located in
 - GitHub: https://github.com/payloadcms/payload
 - Examples: https://github.com/payloadcms/payload/tree/main/examples
 - Templates: https://github.com/payloadcms/payload/tree/main/templates
+
+---
+
+## Project: all-links (Notas Específicas do Projeto)
+
+Este projeto é um "link tree" pessoal construído com Payload CMS + Next.js 16 + Tailwind CSS v4.
+
+### Stack
+
+- **Framework**: Next.js 16 com App Router
+- **CMS**: Payload 3.x (MongoDB)
+- **Styling**: Tailwind CSS v4 + shadcn/ui (canary)
+- **Temas**: next-themes `^0.4.6`
+- **Package manager**: pnpm
+
+### Estrutura atual do projeto
+
+```
+src/
+├── app/
+│   ├── (frontend)/
+│   │   ├── components/
+│   │   │   ├── theme-provider.tsx   # Wrapper do next-themes
+│   │   │   └── ui/
+│   │   │       └── theme-toggle.tsx # Dropdown de troca de tema (usa shadcn)
+│   │   ├── globals.css              # Tailwind v4 + variáveis de tema
+│   │   ├── layout.tsx               # Root layout com ThemeProvider
+│   │   └── page.tsx
+│   └── (payload)/                   # Admin do Payload
+├── collections/
+│   ├── Users.ts                     # Auth collection (NUNCA mover para Global)
+│   └── Media.ts                     # Upload de arquivos
+├── globals/
+│   ├── Links.ts                     # Array de links com drag-and-drop
+│   ├── SocialLinks.ts               # Links de redes sociais
+│   └── Avatar.ts                    # Foto/avatar do perfil
+└── payload.config.ts
+```
+
+### Decisões de arquitetura
+
+#### Collection vs Global — Regra do projeto
+
+| Entidade | Tipo | Motivo |
+|---|---|---|
+| `Users` | Collection | `auth: true` só funciona em Collection — obrigatório para login no admin |
+| `Media` | Collection | Múltiplos arquivos de upload |
+| `Links` | Global | Único, singular, uso de array com drag-and-drop |
+| `SocialLinks` | Global | Único, singular |
+| `Avatar` | Global | Único, singular |
+
+**Regra**: `Users` DEVE ser Collection com `auth: true`. Nunca mover para Global — o admin panel para de funcionar.
+
+#### Ordenação por drag-and-drop (sem campo numérico)
+
+Collections **não** têm drag-and-drop nativo na lista do admin. Para ordenação visual, usar **Global + array field**:
+
+```typescript
+// ✅ Array dentro de Global — tem drag-and-drop nativo
+export const Links: GlobalConfig = {
+  slug: 'links',
+  fields: [
+    {
+      name: 'links',
+      type: 'array',   // ← drag-and-drop automático no admin
+      fields: [
+        { name: 'titulo', type: 'text', required: true },
+        { name: 'url', type: 'text', required: true },
+        { name: 'ativo', type: 'checkbox', defaultValue: true },
+      ],
+    },
+  ],
+}
+```
+
+A ordem do array já é a ordem de exibição — sem campo "Ordem" manual.
+
+### next-themes — Temas light/dark
+
+O `ThemeProvider` usa `attribute="class"`, então o next-themes adiciona a classe `.dark` no `<html>`.
+
+```tsx
+// src/app/(frontend)/layout.tsx
+<ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+  {children}
+</ThemeProvider>
+```
+
+### globals.css — Variáveis de tema (Tailwind v4)
+
+Padrão adotado: variáveis CSS em `:root` (light) e `.dark` (dark), expostas ao Tailwind via `@theme inline`:
+
+```css
+@import "tailwindcss";
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  /* ... demais tokens */
+}
+
+/* Tema Light */
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  /* ... */
+}
+
+/* Tema Dark */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  /* ... */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+```
+
+**Uso no JSX**: `className="bg-background text-foreground border-border"`
+
+#### Background image por tema
+
+```css
+:root {
+  --background-image: url('/images/bg-light.jpg');
+}
+.dark {
+  --background-image: url('/images/bg-dark.jpg');
+}
+
+body {
+  background-image: var(--background-image);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+```
+
+### shadcn/ui — Instalação (Tailwind v4)
+
+Tailwind v4 requer a versão **canary** do shadcn:
+
+```bash
+pnpm dlx shadcn@canary init
+pnpm dlx shadcn@canary add button dropdown-menu
+pnpm add lucide-react
+```
+
+O `components.json` é gerado pelo `shadcn init` e marca que o shadcn está instalado. Sem ele, os componentes `@/components/ui/button` etc. não existem.
