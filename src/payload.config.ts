@@ -11,8 +11,9 @@ import { pt } from "@payloadcms/translations/languages/pt"
 import { Users } from "./collections/Users"
 import { Media } from "./collections/Media"
 import { SocialLinks } from "./globals/SocialLinks"
-import { Avatar } from "./globals/Avatar"
+import { Profile } from "./globals/Profile"
 import { Links } from "./globals/Links"
+import { SiteBackground } from "./globals/SiteBg"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,7 +29,7 @@ export default buildConfig({
     supportedLanguages: { en, pt },
   },
   collections: [Users, Media],
-  globals: [SocialLinks, Avatar, Links],
+  globals: [SocialLinks, Profile, Links, SiteBackground],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
   typescript: {

@@ -6,8 +6,8 @@ import type { Media } from "@/payload-types"
 
 export async function Header() {
   const payload = await getPayload({ config })
-  const avatar = await payload.findGlobal({ slug: "avatar" })
-  const media = avatar.Avatar as Media
+  const profile = await payload.findGlobal({ slug: "profile" })
+  const media = profile.avatar as Media
 
   return (
     <header className="p-6 flex flex-col items-center gap-2">
@@ -23,7 +23,7 @@ export async function Header() {
       </div>
 
       <div>
-        <h1>@kevinsolar</h1>
+        <h1>{profile.socialTag ? `@${profile.socialTag}` : profile.name}</h1>
       </div>
     </header>
   )

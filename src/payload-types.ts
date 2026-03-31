@@ -89,13 +89,15 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'social-links': SocialLink;
-    avatar: Avatar;
+    profile: Profile;
     links: Link;
+    'site-background': SiteBackground;
   };
   globalsSelect: {
     'social-links': SocialLinksSelect<false> | SocialLinksSelect<true>;
-    avatar: AvatarSelect<false> | AvatarSelect<true>;
+    profile: ProfileSelect<false> | ProfileSelect<true>;
     links: LinksSelect<false> | LinksSelect<true>;
+    'site-background': SiteBackgroundSelect<false> | SiteBackgroundSelect<true>;
   };
   locale: null;
   widgets: {
@@ -131,6 +133,9 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  nome?: string | null;
+  avatar: string | Media;
+  '@'?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -248,6 +253,9 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  nome?: T;
+  avatar?: T;
+  '@'?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -343,11 +351,13 @@ export interface SocialLink {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "avatar".
+ * via the `definition` "profile".
  */
-export interface Avatar {
+export interface Profile {
   id: string;
-  Avatar: string | Media;
+  avatar: string | Media;
+  name: string;
+  socialTag: string;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -365,6 +375,17 @@ export interface Link {
         id?: string | null;
       }[]
     | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-background".
+ */
+export interface SiteBackground {
+  id: string;
+  backgroundLight?: (string | null) | Media;
+  backgroundDark?: (string | null) | Media;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -388,10 +409,12 @@ export interface SocialLinksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "avatar_select".
+ * via the `definition` "profile_select".
  */
-export interface AvatarSelect<T extends boolean = true> {
-  Avatar?: T;
+export interface ProfileSelect<T extends boolean = true> {
+  avatar?: T;
+  name?: T;
+  socialTag?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -409,6 +432,17 @@ export interface LinksSelect<T extends boolean = true> {
         ativo?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-background_select".
+ */
+export interface SiteBackgroundSelect<T extends boolean = true> {
+  backgroundLight?: T;
+  backgroundDark?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
