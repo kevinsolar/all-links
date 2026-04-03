@@ -134,7 +134,7 @@ export interface UserAuthOperations {
 export interface User {
   id: string;
   nome?: string | null;
-  avatar: string | Media;
+  avatar?: (string | null) | Media;
   '@'?: string | null;
   updatedAt: string;
   createdAt: string;
